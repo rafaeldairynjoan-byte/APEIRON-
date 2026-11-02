@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apeiron</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d2320;--mute:#6b746f;--line:#e2e0d8;--accent:#2f6b4f;--accent-ink:#fff;--soft:#e8f1ec;--warn:#b4531f;--warn-bg:#fbeee6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a17;--card:#1d2420;--ink:#ecf0ed;--mute:#9aa6a0;--line:#2d3731;--accent:#6fbf98;--accent-ink:#10231a;--soft:#223229;--warn:#f0a070;--warn-bg:#3a261a}}
+:root[data-theme="dark"]{--bg:#141a17;--card:#1d2420;--ink:#ecf0ed;--mute:#9aa6a0;--line:#2d3731;--accent:#6fbf98;--accent-ink:#10231a;--soft:#223229;--warn:#f0a070;--warn-bg:#3a261a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+header{margin-bottom:14px}
+h1{font-size:24px;margin:0;letter-spacing:-.01em}
+.sub{color:var(--mute);font-size:13px;margin-top:2px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px}
+button:hover{border-color:var(--accent)}
+.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:18px}
+.tabs button{flex:1;border:0;border-radius:9px;padding:10px 8px;background:transparent;font-weight:600}
+.tabs button.on{background:var(--accent);color:var(--accent-ink)}
+.view{display:none}.view.on{display:block}
+.narrow{max-width:560px;margin:0 auto}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){.grid{grid-template-columns:1.15fr .85fr;align-items:start}.sticky{position:sticky;top:16px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:0 0 12px;font-weight:600}
+.row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.row.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:520px){.row.three{grid-template-columns:repeat(2,1fr)}}
+label{display:block;font-size:12px;color:var(--mute);margin-bottom:3px}
+input[type=text],input[type=number],input[type=date]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.full{grid-column:1/-1}
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+.out{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px dashed var(--line);font-size:14px}
+.out:first-of-type{border-top:0}
+.out span:first-child{color:var(--mute)}
+.out b{font-variant-numeric:tabular-nums}
+.comp{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.comp h3{margin:0 0 8px;font-size:13px}
+.calc{margin-top:8px;font-size:13px;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 16px}
+.calc b{color:var(--ink)}
+.hero{background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.hero small{opacity:.85;display:block;font-size:12px}
+.hero div{font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.offer{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--soft);margin-bottom:8px}
+.offer small{display:block;color:var(--mute);font-size:12px}
+.offer b{font-size:18px;font-variant-numeric:tabular-nums}
+.flood{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-top:1px dashed var(--line);font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:5px 14px;background:transparent}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.alert{display:none;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:8px}
+.note{font-size:12px;color:var(--mute);margin-top:8px}
+.empty{color:var(--mute);font-size:13px}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.cardhead h2{margin:0}
+.btns{display:flex;gap:6px}
+.btns button{padding:4px 10px;font-size:13px}
+.status{font-size:12px;color:var(--accent);min-height:16px;margin:-6px 0 8px}
+
+a{color:var(--accent)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:hover:not(:disabled){border-color:var(--accent)}
+button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.apps{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.apps button{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;padding:10px 16px;font-weight:700;font-size:16px;color:var(--mute)}
+.apps button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.app{display:none}.app.on{display:block}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+/* Timesheet */
+#app-ts input,#app-ts select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+#app-ts input[type=text],#app-ts input[type=date],#app-ts input[type=month]{width:auto}
+#app-ts input:focus,#app-ts select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+#app-ts .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+#app-ts .bar > div{min-width:150px}
+#app-ts .punch{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+@media(min-width:700px){#app-ts .punch{grid-template-columns:repeat(6,1fr)}}
+#app-ts .punch button{padding:12px 6px;font-weight:600}
+#app-ts .state{font-size:14px;margin-top:2px}
+#app-ts .three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){#app-ts .three{grid-template-columns:1fr}}
+#app-ts .hero{padding:12px 14px;margin-bottom:0}
+#app-ts .hero div{font-size:22px}
+#app-ts .hero em{font-style:normal;font-size:12px;opacity:.85}
+#app-ts .scroll{overflow-x:auto}
+#app-ts table{border-collapse:collapse;width:100%;font-size:14px}
+#app-ts th,#app-ts td{padding:6px 6px;border-top:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:middle}
+#app-ts th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600;border-top:0}
+#app-ts td input[type=time]{width:112px;padding:5px 6px}
+#app-ts tr.today td{background:var(--soft)}
+#app-ts td.num,#app-ts th.num{text-align:right;font-variant-numeric:tabular-nums}
+#app-ts tfoot td{font-weight:700}
+#app-ts .bp{display:inline-flex;align-items:center;gap:3px;margin-right:6px}
+#app-ts .bp button,#app-ts .mini{padding:2px 8px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Apeiron</h1>
+  <div class="sub">Land calculators and the agent timesheet, in one place.</div>
+</header>
+
+<div class="apps" role="tablist">
+  <button type="button" role="tab" data-app="calc" class="on">Land Calculators</button>
+  <button type="button" role="tab" data-app="ts">Timesheet</button>
+</div>
+
+<!-- FEATURE 1: LAND CALCULATORS -->
+<section class="app on" id="app-calc">
+<div class="toolbar">
+  <div class="sub">Pick a calculator below. Acres uses 5 comps. Small Lot uses 3 comps.</div>
+  <button id="reset" type="button">Clear this calculator</button>
+</div>
+
+
+<div class="tabs" role="tablist">
+  <button type="button" role="tab" data-view="acres" class="on">Acres Calculator</button>
+  <button type="button" role="tab" data-view="small">Small Lot Calculator</button>
+</div>
+
+<!-- ACRES -->
+<div class="view on" id="view-acres">
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>Target property</h2>
+      <div class="row">
+        <div class="full"><label for="t-addr">Target address</label><input type="text" id="t-addr" value="" placeholder="e.g. 123 Main Street"></div>
+        <div><label for="t-sqft">Square feet</label><input type="number" id="t-sqft" min="0" step="any" value=""></div>
+        <div><label for="t-fill">Acres (override)</label><input type="number" id="t-fill" min="0" step="any" value="" placeholder="auto from sq ft"></div>
+        <div class="full"><label for="t-val">Market total value ($)</label><input type="number" id="t-val" min="0" step="any" value=""></div>
+      </div>
+      <div class="calc" id="t-calc"></div>
+    </div>
+    <div class="card">
+      <div class="cardhead"><h2>Sold comps</h2><span class="btns"><button type="button" data-exp="a">Export CSV</button><button type="button" data-copy="a">Copy</button></span></div>
+      <div class="status" id="a-status" role="status"></div>
+      <div id="comps"></div>
+      <div class="note">Acres from sq ft = sq ft ÷ 43,560. If you type an acres override, it is used instead.</div>
+    </div>
+  </div>
+  <div class="sticky">
+    <div class="card">
+      <h2>Comp method</h2>
+      <div class="hero"><small>Average price per acre</small><div id="avg">—</div></div>
+      <div class="out"><span>Target value to sell to buyer</span><b id="val">—</b></div>
+      <div class="offer" style="margin-top:10px"><span>Last resort MAO<small>Value less 20%</small></span><b id="m-last">—</b></div>
+      <div class="offer"><span>MAO of land<small>Value less 30%</small></span><b id="m-mao">—</b></div>
+      <div class="offer"><span>First offer<small>50% of value</small></span><b id="m-first">—</b></div>
+      <div class="offer"><span>Start your range<small>25% of value</small></span><b id="m-start">—</b></div>
+    </div>
+    <div class="card">
+      <h2>Questions to ask yourself</h2>
+      <div class="flood"><span>1. Is my property in a flood zone?</span><span class="seg" data-k="p"><button type="button" data-v="Yes">Yes</button><button type="button" data-v="No" class="on">No</button></span></div>
+      <div class="flood"><span>2. Are my comps in a flood zone?</span><span class="seg" data-k="c"><button type="button" data-v="Yes">Yes</button><button type="button" data-v="No" class="on">No</button></span></div>
+      <div class="alert" id="alert"></div>
+    </div>
+    <div class="card">
+      <h2>Builder method</h2>
+      <label for="b-arv">Average new build ARV ($)</label>
+      <input type="number" id="b-arv" min="0" step="any" value="" placeholder="e.g. 350000">
+      <div class="out" style="margin-top:10px"><span>Average purchase price of land (15%)</span><b id="b-land">—</b></div>
+      <div class="out"><span>Last resort MAO (less 20%)</span><b id="b-last">—</b></div>
+      <div class="out"><span>MAO of land (less 30%)</span><b id="b-mao">—</b></div>
+      <div class="out"><span>First offer (50%)</span><b id="b-first">—</b></div>
+      <div class="out"><span>Start your range (25%)</span><b id="b-start">—</b></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SMALL LOT -->
+<div class="view" id="view-small">
+<div class="narrow">
+  <div class="card">
+    <h2>Inputs</h2>
+    <div class="field"><label for="s-apl">Average purchased price of land ($), optional override</label><input type="number" id="s-apl" min="0" step="any" value="" placeholder="auto from comps"></div>
+    <div class="field"><label for="s-lav">Land appraised value ($)</label><input type="number" id="s-lav" min="0" step="any" value=""></div>
+  </div>
+  <div class="card">
+    <h2>Discounts</h2>
+    <div class="out"><span>30% of average purchase</span><b id="s-p30">—</b></div>
+    <div class="out"><span>20% of average purchase</span><b id="s-p20">—</b></div>
+  </div>
+  <div class="card">
+    <h2>Offer ladder</h2>
+    <div class="hero"><small>MAO of land</small><div id="s-hero">—</div></div>
+    <div class="offer"><span>Last resort MAO<small>Average less 20%</small></span><b id="s-last">—</b></div>
+    <div class="offer"><span>MAO of land<small>Average less 30%</small></span><b id="s-mao">—</b></div>
+    <div class="offer"><span>First offer<small>50% of average</small></span><b id="s-first">—</b></div>
+    <div class="offer"><span>Start of your range<small>50% of appraised value</small></span><b id="s-start">—</b></div>
+    <div class="note">Estimates only. Always confirm with your own comps before making an offer.</div>
+  </div>
+  <div class="card">
+    <div class="cardhead"><h2>Sold comps</h2><span class="btns"><button type="button" data-exp="s">Export CSV</button><button type="button" data-copy="s">Copy</button></span></div>
+    <div class="status" id="s-status" role="status"></div>
+    <div id="s-comps"></div>
+    <div class="calc" id="s-avgline"></div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- FEATURE 2: TIMESHEET -->
+<section class="app" id="app-ts">
+<div class="sub" style="margin-bottom:12px">Agents clock in and out, take bio and lunch breaks, and hours are computed for each 2-week pay period. Hours are log out minus log in, with no deductions.</div>
+
+
+<div class="card">
+  <h2>Agents</h2>
+  <div class="bar">
+    <div><label for="agent">Agent</label><select id="agent"></select></div>
+    <div><label for="newname">Add agent</label><input type="text" id="newname" placeholder="Name"></div>
+    <button type="button" class="pri" data-act="addagent">Add</button>
+    <button type="button" data-act="delagent">Remove selected</button>
+    <button type="button" data-act="resetsample">Reset sample data</button>
+  </div>
+</div>
+
+<div class="card" id="clockcard">
+  <h2>Time clock</h2>
+  <div class="state" id="state"></div>
+  <div class="punch">
+    <button type="button" class="pri" data-p="in">Log in</button>
+    <button type="button" data-p="bioOut">Bio out</button>
+    <button type="button" data-p="bioIn">Bio in</button>
+    <button type="button" data-p="lunchOut">Lunch out</button>
+    <button type="button" data-p="lunchIn">Lunch in</button>
+    <button type="button" class="pri" data-p="out">Log out</button>
+  </div>
+  <div class="note">Each button stamps the current time on today’s row. You can fix any time in the table below.</div>
+</div>
+
+<div class="card">
+  <h2>Totals (selected agent)</h2>
+  <div class="bar" style="margin-bottom:12px">
+    <div><label for="vday">Day</label><input type="date" id="vday"></div>
+    <div><label for="vper">2 weeks starting</label><input type="date" id="vper"></div>
+    <div><label for="month">Month</label><input type="month" id="month"></div>
+    <button type="button" data-act="today">Reset to today</button>
+  </div>
+  <div class="three">
+    <div class="hero"><small id="l-day">Day</small><div id="t-day">—</div><em id="t-day2"></em></div>
+    <div class="hero"><small id="l-per">2 weeks</small><div id="t-per">—</div><em id="t-per2"></em></div>
+    <div class="hero"><small id="l-mon">Month</small><div id="t-mon">—</div><em id="t-mon2"></em></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Pay period</h2>
+  <div class="bar" style="margin-bottom:10px">
+    <button type="button" data-act="prev">← Previous</button>
+    <div style="min-width:200px"><b id="plabel"></b></div>
+    <button type="button" data-act="next">Next →</button>
+    <button type="button" data-act="cur">Current</button>
+    <div><label for="anchor">Pay schedule starts</label><input type="date" id="anchor"></div>
+    <button type="button" class="pri" data-act="csv1">Export CSV (this agent)</button>
+    <button type="button" class="pri" data-act="csvall">Export CSV (all agents)</button>
+  </div>
+  <div class="scroll"><table>
+    <thead><tr><th>Date</th><th>Log in</th><th>Lunch out</th><th>Lunch in</th><th>Bio breaks (out – in)</th><th>Log out</th><th class="num">Hours</th></tr></thead>
+    <tbody id="rows"></tbody>
+    <tfoot><tr><td colspan="6">Pay period total</td><td class="num" id="foot">—</td></tr></tfoot>
+  </table></div>
+  <div class="note">Hours = log out minus log in. Nothing is deducted. A shift only counts once it has a log in and a log out. The CSV has the same 14 days.</div>
+</div>
+
+<div class="card">
+  <h2>All agents</h2>
+  <div class="scroll" id="all"></div>
+  <div class="note">Dates come from the Day, 2 weeks and Month boxes above. Saved in this browser only.</div>
+</div>
+</section>
+</div>
+
+<script>
+(function(){
+  var SQFT_PER_ACRE = 43560;
+  var $ = function(id){ return document.getElementById(id); };
+  var money = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+  var money2 = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});
+  var num = function(v){ var n = parseFloat(v); return isFinite(n) ? n : 0; };
+  var fm = function(n){ return isFinite(n) && n > 0 ? money.format(n) : '—'; };
+  var acresFmt = function(n){ return n > 0 ? n.toFixed(4) : '—'; };
+
+  /* ---------- tabs ---------- */
+  var current = 'acres';
+  function show(v){
+    current = v === 'small' ? 'small' : 'acres';
+    document.querySelectorAll('.tabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.view === current); });
+    $('view-acres').classList.toggle('on', current === 'acres');
+    $('view-small').classList.toggle('on', current === 'small');
+  }
+  document.querySelector('.tabs').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    show(b.dataset.view);
+    try { history.replaceState(null, '', '#' + current); } catch(err) {}
+  });
+  window.addEventListener('hashchange', function(){ var h = location.hash.replace('#',''); if (h === 'acres' || h === 'small') show(h); });
+  show(location.hash.replace('#',''));
+
+  /* ---------- acres ---------- */
+  var blank = function(){ return {addr:'',date:'',price:'',sqft:'',fill:'',sold:'',bought:''}; };
+  var compsEl = $('comps'), sCompsEl = $('s-comps');
+  function esc(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function buildComps(el, data, small){
+    el.innerHTML = '';
+    data.forEach(function(c,i){
+      var d = document.createElement('div');
+      d.className = 'comp';
+      d.innerHTML =
+        '<h3>Comp #'+(i+1)+'</h3><div class="row three">' +
+        '<div class="full"><label>Property address</label><input type="text" data-f="addr" value="'+esc(c.addr)+'"></div>' +
+        '<div><label>Date of purchase</label><input type="date" data-f="date" value="'+esc(c.date)+'"></div>' +
+        '<div><label>Purchase price ($)</label><input type="number" min="0" step="any" data-f="price" value="'+esc(c.price)+'"></div>' +
+        '<div><label>Lot size (sq ft)</label><input type="number" min="0" step="any" data-f="sqft" value="'+esc(c.sqft)+'"></div>' +
+        (small ? '' : '<div><label>Acres (override)</label><input type="number" min="0" step="any" data-f="fill" value="'+esc(c.fill)+'" placeholder="auto"></div>') +
+        '<div><label>Sold by</label><input type="text" data-f="sold" value="'+esc(c.sold)+'"></div>' +
+        '<div><label>Bought by</label><input type="text" data-f="bought" value="'+esc(c.bought)+'"></div>' +
+        '</div><div class="calc"></div>';
+      el.appendChild(d);
+    });
+  }
+  function acresOf(sqft, fill){
+    var f = num(fill);
+    return f > 0 ? f : (num(sqft) > 0 ? num(sqft) / SQFT_PER_ACRE : 0);
+  }
+  function offers(base, ids){
+    var b = base > 0 ? base : 0;
+    $(ids[0]).textContent = fm(b * 0.8);
+    $(ids[1]).textContent = fm(b * 0.7);
+    $(ids[2]).textContent = fm(b * 0.5);
+    $(ids[3]).textContent = fm(b * 0.25);
+  }
+  var flood = {p:'No', c:'No'};
+  function calcAcres(){
+    var tSqft = num($('t-sqft').value), tVal = num($('t-val').value);
+    var tRaw = tSqft / SQFT_PER_ACRE, tAcres = acresOf(tSqft, $('t-fill').value);
+    var parts = [];
+    if (tSqft > 0) parts.push('Acres from sq ft: <b>'+acresFmt(tRaw)+'</b>');
+    if (tSqft > 0 && tVal > 0) parts.push('Per sq ft: <b>'+money2.format(tVal/tSqft)+'</b>');
+    if (tRaw > 0 && tVal > 0) parts.push('Per acre (from sq ft): <b>'+money.format(tVal/tRaw)+'</b>');
+    if (num($('t-fill').value) > 0 && tVal > 0) parts.push('Per acre (override): <b>'+money.format(tVal/num($('t-fill').value))+'</b>');
+    $('t-calc').innerHTML = parts.join('');
+
+    var ppas = [];
+    Array.prototype.forEach.call(compsEl.children, function(el){
+      var g = function(f){ return el.querySelector('[data-f="'+f+'"]').value; };
+      var price = num(g('price')), sqft = num(g('sqft')), a = acresOf(g('sqft'), g('fill'));
+      var out = [];
+      if (a > 0) out.push('Acres: <b>'+acresFmt(a)+'</b>');
+      if (price > 0 && sqft > 0) out.push('Per sq ft: <b>'+money2.format(price/sqft)+'</b>');
+      if (price > 0 && a > 0){ var p = price / a; ppas.push(p); out.push('Per acre: <b>'+money.format(p)+'</b>'); }
+      el.querySelector('.calc').innerHTML = out.length ? out.join('') : '<span class="empty">Fill in price and size to include this comp.</span>';
+    });
+    var avg = ppas.length ? ppas.reduce(function(s,x){return s+x;},0) / ppas.length : 0;
+    $('avg').textContent = avg > 0 ? money.format(avg) : '—';
+    var value = avg * tAcres;
+    $('val').textContent = fm(value);
+    offers(value, ['m-last','m-mao','m-first','m-start']);
+
+    var land = num($('b-arv').value) * 0.15;
+    $('b-land').textContent = fm(land);
+    offers(land, ['b-last','b-mao','b-first','b-start']);
+
+    var msgs = [];
+    if (flood.p === 'Yes') msgs.push('Your property is in a flood zone, so expect a lower buyer value.');
+    if (flood.c === 'Yes') msgs.push('Comps in a flood zone can drag your average down. Confirm they match your property.');
+    if (flood.p !== flood.c) msgs.push('Flood status differs between your property and the comps, so the comps may not be a fair match.');
+    var al = $('alert');
+    al.style.display = msgs.length ? 'block' : 'none';
+    al.textContent = msgs.join(' ');
+  }
+  document.querySelectorAll('.seg').forEach(function(seg){
+    seg.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if (!b) return;
+      seg.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+      flood[seg.dataset.k] = b.dataset.v; calcAcres();
+    });
+  });
+
+  /* ---------- small lot ---------- */
+  function calcSmall(){
+    var prices = [];
+    Array.prototype.forEach.call(sCompsEl.children, function(el){
+      var g = function(f){ return el.querySelector('[data-f="'+f+'"]').value; };
+      var price = num(g('price')), sqft = num(g('sqft'));
+      var out = [];
+      if (sqft > 0) out.push('Lot: <b>'+Math.round(sqft).toLocaleString('en-US')+' sq ft</b>');
+      if (price > 0 && sqft > 0) out.push('Per sq ft: <b>'+money2.format(price/sqft)+'</b>');
+      if (price > 0) prices.push(price);
+      el.querySelector('.calc').innerHTML = out.length ? out.join('') : '<span class="empty">Fill in price and lot size to include this comp.</span>';
+    });
+    var avgComps = prices.length ? prices.reduce(function(t,x){return t+x;},0) / prices.length : 0;
+    var override = num($('s-apl').value);
+    var a = override > 0 ? override : avgComps;
+    $('s-avgline').innerHTML = avgComps > 0 ? 'Average comp price: <b>'+money.format(avgComps)+'</b>' + (override > 0 ? 'Override in use: <b>'+money.format(override)+'</b>' : '') : '';
+    var v = num($('s-lav').value);
+    $('s-p30').textContent = fm(a * 0.3);
+    $('s-p20').textContent = fm(a * 0.2);
+    $('s-last').textContent = fm(a * 0.8);
+    $('s-hero').textContent = fm(a * 0.7);
+    $('s-mao').textContent = fm(a * 0.7);
+    $('s-first').textContent = fm(a * 0.5);
+    $('s-start').textContent = fm(v * 0.5);
+  }
+
+  /* ---------- export comps ---------- */
+  var HEAD = ['Comp','Property address','Date of purchase','Purchase price','Lot size (sq ft)','Acres used','Price per sq ft','Price per acre','Sold by','Bought by'];
+  function compRows(el){
+    var rows = [];
+    Array.prototype.forEach.call(el.children, function(c,i){
+      var g = function(f){ var x = c.querySelector('[data-f="'+f+'"]'); return x ? x.value.trim() : ''; };
+      var price = num(g('price')), sqft = num(g('sqft')), a = acresOf(g('sqft'), g('fill'));
+      if (!(g('addr') || g('date') || price || sqft || num(g('fill')) || g('sold') || g('bought'))) return;
+      rows.push([i+1, g('addr'), g('date'), price || '', sqft || '', a > 0 ? a.toFixed(4) : '',
+        price > 0 && sqft > 0 ? (price/sqft).toFixed(2) : '', price > 0 && a > 0 ? (price/a).toFixed(2) : '', g('sold'), g('bought')]);
+    });
+    return rows;
+  }
+  function summaryRow(kind, rows){
+    var vals = rows.map(function(r){ return parseFloat(r[kind === 'acres' ? 7 : 3]); }).filter(function(x){ return x > 0; });
+    if (!vals.length) return null;
+    var avg = vals.reduce(function(t,x){ return t + x; }, 0) / vals.length;
+    return [kind === 'acres' ? 'Average price per acre' : 'Average purchase price', avg.toFixed(2)];
+  }
+  function csvCell(v, text){
+    var t = String(v);
+    if (text && /^[=+\-@\t\r]/.test(t)) t = "'" + t;
+    return '"' + t.replace(/"/g,'""') + '"';
+  }
+  function toCSV(kind, rows){
+    var lines = [HEAD.map(function(h){ return csvCell(h); }).join(',')];
+    rows.forEach(function(r){ lines.push(r.map(function(v,j){ return csvCell(v, j === 1 || j === 8 || j === 9); }).join(',')); });
+    var sm = summaryRow(kind, rows);
+    if (sm) { lines.push(''); lines.push(sm.map(function(v){ return csvCell(v); }).join(',')); }
+    return lines.join('\r\n');
+  }
+  function toTSV(kind, rows){
+    var all = [HEAD].concat(rows);
+    var sm = summaryRow(kind, rows);
+    if (sm) { all.push([]); all.push(sm); }
+    return all.map(function(r, i){ return r.map(function(v, j){
+      var t = String(v).replace(/[\t\r\n]+/g,' ');
+      if (i > 0 && (j === 1 || j === 8 || j === 9) && /^[=+\-@]/.test(t)) t = "'" + t;
+      return t; }).join('\t'); }).join('\n');
+  }
+  function stat(k, msg){
+    var e = $(k + '-status'); e.textContent = msg;
+    clearTimeout(e._t); e._t = setTimeout(function(){ e.textContent = ''; }, 4000);
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    var k = b.dataset.exp || b.dataset.copy; if (!k) return;
+    var kind = k === 's' ? 'small' : 'acres';
+    var rows = compRows(kind === 'small' ? sCompsEl : compsEl);
+    if (!rows.length) { stat(k, 'Nothing to export yet. Fill in at least one comp.'); return; }
+    var n = rows.length + ' comp' + (rows.length > 1 ? 's' : '');
+    if (b.dataset.exp) {
+      var url = URL.createObjectURL(new Blob(['\ufeff' + toCSV(kind, rows)], {type:'text/csv;charset=utf-8'}));
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = (kind === 'small' ? 'small-lot-comps-' : 'acres-comps-') + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      stat(k, 'Exported ' + n + ' to CSV.');
+    } else {
+      var fail = function(){ stat(k, 'Copy was blocked by the browser. Use Export CSV instead.'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(toTSV(kind, rows)).then(function(){ stat(k, 'Copied ' + n + '. Paste into Excel or Sheets.'); }, fail);
+      } else { fail(); }
+    }
+  });
+
+  function calc(){ calcAcres(); calcSmall(); }
+  document.addEventListener('input', calc);
+
+  $('reset').addEventListener('click', function(){
+    if (current === 'acres') {
+      ['t-addr','t-sqft','t-fill','t-val','b-arv'].forEach(function(id){ $(id).value = ''; });
+      buildComps(compsEl, [1,2,3,4,5].map(blank), false);
+    } else {
+      $('s-apl').value = ''; $('s-lav').value = ''; buildComps(sCompsEl, [1,2,3].map(blank), true);
+    }
+    calc();
+  });
+
+  buildComps(compsEl, [1,2,3,4,5].map(blank), false);
+  buildComps(sCompsEl, [1,2,3].map(blank), true);
+  calc();
+})();
+</script>
+<script>
+(function(){
+  var KEY = 'apeiron.timesheet.v1';
+  var NAMES = ['Muhammad Abdullah','Maqsood Mehboob','Rao Shakil Ahmad','Mamdouh','Brethney Valor','Jelissa Divino','Ralph Laurence Metran','Royce Aquino','Rain'];
+  function $(i){ return document.getElementById(i); }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function iso(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+  function pd(s){ var p = s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function add(s, n){ var d = pd(s); d.setDate(d.getDate() + n); return iso(d); }
+  function diff(a, b){ return Math.round((pd(b) - pd(a)) / 864e5); }
+  function monday(d){ var x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return iso(x); }
+  function nowT(){ var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function hm(m){ return pad(Math.floor(m/60) % 24) + ':' + pad(m % 60); }
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function short(s){ var d = pd(s); return MON[d.getMonth()] + ' ' + d.getDate(); }
+
+  var today = iso(new Date());
+
+  function seed(S){
+    S.agents = NAMES.map(function(n, i){ return { id: 'a' + (i + 1), name: n }; });
+    S.days = {};
+    S.anchor = add(monday(new Date()), -7);
+    var start = add(monday(new Date()), -21);
+    for (var n = 0; n < 40; n++) {
+      var d = add(start, n);
+      if (d >= today) break;
+      var w = pd(d).getDay();
+      if (w === 0 || w === 6) continue;
+      S.agents.forEach(function(a, i){
+        var h = (i * 31 + n * 17) % 7;
+        if (h === 6 && i % 3 === 0) return;
+        var inM = 8 * 60 + h * 3, r = { b: [] };
+        r.in = hm(inM); r.lo = hm(12 * 60 + (h % 3) * 5); r.li = hm(12 * 60 + (h % 3) * 5 + 30);
+        if (h % 2 === 0) r.b.push([hm(10 * 60 + 30), hm(10 * 60 + 40)]);
+        r.out = hm(inM + 8 * 60 + 30 + h * 4);
+        S.days[a.id + '|' + d] = r;
+      });
+    }
+    S.cur = S.agents[0].id; S.seeded = true;
+  }
+
+  var S;
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e) { S = null; }
+  if (!S || !S.agents) S = { agents: [], days: {}, anchor: monday(new Date()), cur: null };
+  if (!S.agents.length && !S.seeded) seed(S);
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+
+  var vday = today, month = today.slice(0, 7), pcur;
+  function pstartAuto(){ return add(S.anchor, 14 * Math.floor(diff(S.anchor, today) / 14)); }
+  pcur = pstartAuto();
+
+  function key(a, d){ return a + '|' + d; }
+  function rec(a, d, make){
+    var k = key(a, d), r = S.days[k];
+    if (!r && make) r = S.days[k] = { b: [] };
+    if (r && !r.b) r.b = [];
+    return r;
+  }
+  function mins(t){ var p = t.split(':'); return +p[0] * 60 + +p[1]; }
+  function span(a, b){
+    if (!a || !b) return null;
+    var d = mins(b) - mins(a);
+    if (d < 0) d += 1440;
+    return d;
+  }
+  // No deductions: hours are simply log out minus log in.
+  function work(r){
+    if (!r || !r.in || !r.out) return null;
+    return span(r.in, r.out);
+  }
+  function fmt(m){ return m == null ? '—' : Math.floor(m/60) + 'h ' + pad(m % 60) + 'm'; }
+  function dec(m){ return m == null ? '' : (m/60).toFixed(2) + ' hrs'; }
+  function sum(a, from, to){
+    var t = 0;
+    for (var k in S.days) {
+      if (k.indexOf(a + '|') !== 0) continue;
+      var d = k.slice(a.length + 1);
+      if (d < from || d > to) continue;
+      var m = work(S.days[k]);
+      if (m != null) t += m;
+    }
+    return t;
+  }
+  function openBio(r){ for (var i = 0; i < r.b.length; i++) if (r.b[i][0] && !r.b[i][1]) return i; return -1; }
+  function agent(id){ return S.agents.filter(function(a){ return a.id === id; })[0]; }
+
+  function status(r){
+    if (!r || !r.in) return { s: 'Not logged in', can: { in: true } };
+    if (r.out) return { s: 'Logged out at ' + r.out, can: {} };
+    if (openBio(r) >= 0) return { s: 'On bio break', can: { bioIn: true } };
+    if (r.lo && !r.li) return { s: 'On lunch since ' + r.lo, can: { lunchIn: true } };
+    var can = { bioOut: true, out: true };
+    if (!r.lo) can.lunchOut = true;
+    return { s: 'Working since ' + r.in, can: can };
+  }
+
+  function punch(type){
+    if (!S.cur) return;
+    var r = rec(S.cur, today, true), t = nowT();
+    if (type === 'in') r.in = t;
+    else if (type === 'out') r.out = t;
+    else if (type === 'lunchOut') r.lo = t;
+    else if (type === 'lunchIn') r.li = t;
+    else if (type === 'bioOut') r.b.push([t, '']);
+    else if (type === 'bioIn') { var i = openBio(r); if (i >= 0) r.b[i][1] = t; }
+    save(); render();
+  }
+
+  /* ---------- CSV ---------- */
+  function cell(c){ c = String(c == null ? '' : c); return /[",\r\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }
+  function download(name, rows){
+    var text = '\ufeff' + rows.map(function(r){ return r.map(cell).join(','); }).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+    a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  var HEAD = ['Agent','Date','Day','Log in','Lunch out','Lunch in','Bio breaks','Log out','Hours (H:MM)','Hours (decimal)'];
+  function csvRows(a, ps){
+    var out = [], tot = 0;
+    for (var i = 0; i < 14; i++) {
+      var d = add(ps, i), r = rec(a.id, d) || { b: [] }, m = work(r);
+      if (m != null) tot += m;
+      var bios = r.b.filter(function(p){ return p[0] || p[1]; }).map(function(p){ return p[0] + '-' + p[1]; }).join('; ');
+      out.push([a.name, d, DOW[pd(d).getDay()], r.in || '', r.lo || '', r.li || '', bios, r.out || '',
+        m == null ? '' : Math.floor(m/60) + ':' + pad(m % 60), m == null ? '' : (m/60).toFixed(2)]);
+    }
+    out.push([a.name, 'TOTAL', '', '', '', '', '', '', Math.floor(tot/60) + ':' + pad(tot % 60), (tot/60).toFixed(2)]);
+    return out;
+  }
+  function slug(s){ return s.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
+
+  function render(){
+    if (S.cur && !agent(S.cur)) S.cur = null;
+    if (!S.cur && S.agents.length) S.cur = S.agents[0].id;
+    $('agent').innerHTML = S.agents.length ? S.agents.map(function(a){
+      return '<option value="' + a.id + '"' + (a.id === S.cur ? ' selected' : '') + '>' + esc(a.name) + '</option>';
+    }).join('') : '<option value="">No agents yet</option>';
+    $('anchor').value = S.anchor;
+    $('vday').value = vday; $('vper').value = pcur; $('month').value = month;
+
+    var has = !!S.cur;
+    var ps = pcur, pe = add(ps, 13);
+    $('plabel').textContent = short(ps) + ' – ' + short(pe) + ', ' + pd(pe).getFullYear();
+
+    var st = has ? status(rec(S.cur, today)) : { s: 'Add an agent to start the clock.', can: {} };
+    $('state').innerHTML = has ? '<b>' + esc(agent(S.cur).name) + '</b>: ' + esc(st.s) : esc(st.s);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-p]'), function(b){ b.disabled = !st.can[b.getAttribute('data-p')]; });
+
+    var rows = '';
+    if (has) {
+      for (var i = 0; i < 14; i++) {
+        var d = add(ps, i), r = rec(S.cur, d) || { b: [] }, dt = pd(d);
+        var ti = function(f, v){ return '<input type="time" data-d="' + d + '" data-f="' + f + '" value="' + (v || '') + '">'; };
+        var bios = r.b.map(function(p, j){
+          return '<span class="bp"><input type="time" data-d="' + d + '" data-b="' + j + '" data-i="0" value="' + p[0] + '">–<input type="time" data-d="' + d + '" data-b="' + j + '" data-i="1" value="' + p[1] + '"><button type="button" class="mini" data-act="delbio" data-d="' + d + '" data-j="' + j + '" aria-label="Remove bio break">×</button></span>';
+        }).join('');
+        rows += '<tr' + (d === today ? ' class="today"' : '') + '><td>' + DOW[dt.getDay()] + ' ' + short(d) + '</td><td>' + ti('in', r.in) + '</td><td>' + ti('lo', r.lo) + '</td><td>' + ti('li', r.li) + '</td><td>' + bios + '<button type="button" class="mini" data-act="addbio" data-d="' + d + '">+ Bio</button></td><td>' + ti('out', r.out) + '</td><td class="num">' + fmt(work(r)) + '</td></tr>';
+      }
+    } else rows = '<tr><td colspan="7" class="empty">No agent selected.</td></tr>';
+    $('rows').innerHTML = rows;
+
+    var mFrom = month + '-01', mTo = month + '-31';
+    var dayM = has ? sum(S.cur, vday, vday) : 0;
+    var perM = has ? sum(S.cur, ps, pe) : 0;
+    var monM = has ? sum(S.cur, mFrom, mTo) : 0;
+    var mlab = MON[+month.slice(5) - 1] + ' ' + month.slice(0, 4);
+    $('l-day').textContent = 'Day · ' + DOW[pd(vday).getDay()] + ' ' + short(vday);
+    $('l-per').textContent = '2 weeks · ' + short(ps) + ' – ' + short(pe);
+    $('l-mon').textContent = 'Month · ' + mlab;
+    $('t-day').textContent = fmt(dayM); $('t-day2').textContent = dec(dayM);
+    $('t-per').textContent = fmt(perM); $('t-per2').textContent = dec(perM);
+    $('t-mon').textContent = fmt(monM); $('t-mon2').textContent = dec(monM);
+    $('foot').textContent = fmt(perM) + ' (' + (perM/60).toFixed(2) + ')';
+
+    if (!S.agents.length) { $('all').innerHTML = '<div class="empty">No agents yet.</div>'; return; }
+    var tt = [0, 0, 0];
+    var h = '<table><thead><tr><th>Agent</th><th class="num">Day<br>' + short(vday) + '</th><th class="num">2 weeks<br>' + short(ps) + ' – ' + short(pe) + '</th><th class="num">Month<br>' + mlab + '</th></tr></thead><tbody>';
+    S.agents.forEach(function(a){
+      var v = [sum(a.id, vday, vday), sum(a.id, ps, pe), sum(a.id, mFrom, mTo)];
+      v.forEach(function(x, i){ tt[i] += x; });
+      h += '<tr><td>' + esc(a.name) + '</td><td class="num">' + fmt(v[0]) + '</td><td class="num">' + fmt(v[1]) + '</td><td class="num">' + fmt(v[2]) + '</td></tr>';
+    });
+    h += '</tbody><tfoot><tr><td>All agents</td><td class="num">' + fmt(tt[0]) + '</td><td class="num">' + fmt(tt[1]) + '</td><td class="num">' + fmt(tt[2]) + '</td></tr></tfoot></table>';
+    $('all').innerHTML = h;
+  }
+
+  function addAgent(){
+    var n = $('newname').value.trim();
+    if (!n) return;
+    var a = { id: 'a' + Date.now(), name: n };
+    S.agents.push(a); S.cur = a.id; $('newname').value = '';
+    save(); render();
+  }
+
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('button');
+    if (!b) return;
+    var p = b.getAttribute('data-p'), act = b.getAttribute('data-act'), d = b.getAttribute('data-d');
+    if (p) return punch(p);
+    if (act === 'addagent') addAgent();
+    else if (act === 'delagent') {
+      var a = agent(S.cur);
+      if (!a || !confirm('Remove ' + a.name + ' and all of their times?')) return;
+      S.agents = S.agents.filter(function(x){ return x.id !== a.id; });
+      for (var k in S.days) if (k.indexOf(a.id + '|') === 0) delete S.days[k];
+      S.cur = null; S.seeded = true; save(); render();
+    }
+    else if (act === 'resetsample') {
+      if (!confirm('Replace everything with the sample agents and times?')) return;
+      seed(S); pcur = pstartAuto(); save(); render();
+    }
+    else if (act === 'prev') { pcur = add(pcur, -14); render(); }
+    else if (act === 'next') { pcur = add(pcur, 14); render(); }
+    else if (act === 'cur') { pcur = pstartAuto(); render(); }
+    else if (act === 'today') { vday = today; month = today.slice(0, 7); pcur = pstartAuto(); render(); }
+    else if (act === 'csv1') {
+      var ag = agent(S.cur); if (!ag) return;
+      download('timesheet_' + slug(ag.name) + '_' + pcur + '_to_' + add(pcur, 13) + '.csv', [HEAD].concat(csvRows(ag, pcur)));
+    }
+    else if (act === 'csvall') {
+      var all = [HEAD];
+      S.agents.forEach(function(x){ all = all.concat(csvRows(x, pcur)); });
+      download('timesheet_all_agents_' + pcur + '_to_' + add(pcur, 13) + '.csv', all);
+    }
+    else if (act === 'addbio') { rec(S.cur, d, true).b.push(['', '']); save(); render(); }
+    else if (act === 'delbio') { rec(S.cur, d).b.splice(+b.getAttribute('data-j'), 1); save(); render(); }
+  });
+
+  document.addEventListener('change', function(e){
+    var t = e.target, id = t.id, d = t.getAttribute('data-d');
+    if (id === 'agent') { S.cur = t.value; save(); return render(); }
+    if (id === 'anchor') { if (t.value) { S.anchor = t.value; pcur = pstartAuto(); save(); } return render(); }
+    if (id === 'vday') { if (t.value) vday = t.value; return render(); }
+    if (id === 'vper') { if (t.value) pcur = t.value; return render(); }
+    if (id === 'month') { if (t.value) month = t.value; return render(); }
+    if (!d || !S.cur) return;
+    var r = rec(S.cur, d, true), f = t.getAttribute('data-f');
+    if (f) { if (t.value) r[f] = t.value; else delete r[f]; }
+    else r.b[+t.getAttribute('data-b')][+t.getAttribute('data-i')] = t.value;
+    save(); render();
+  });
+
+  $('newname').addEventListener('keydown', function(e){ if (e.key === 'Enter') addAgent(); });
+  render();
+})();
+</script>
+<script>
+(function(){
+  var apps = document.querySelectorAll('.apps button'), secs = { calc: document.getElementById('app-calc'), ts: document.getElementById('app-ts') };
+  function open(a){
+    a = a === 'ts' ? 'ts' : 'calc';
+    apps.forEach(function(b){ b.classList.toggle('on', b.dataset.app === a); });
+    secs.calc.classList.toggle('on', a === 'calc'); secs.ts.classList.toggle('on', a === 'ts');
+    document.title = 'Apeiron · ' + (a === 'ts' ? 'Timesheet' : 'Land Calculators');
+  }
+  document.querySelector('.apps').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    open(b.dataset.app);
+    var h = b.dataset.app === 'ts' ? 'timesheet' : document.querySelector('#app-calc .tabs button.on').dataset.view;
+    try { history.replaceState(null, '', '#' + h); } catch(err) {}
+  });
+  window.addEventListener('hashchange', function(){
+    var h = location.hash.replace('#','');
+    if (h === 'timesheet') open('ts'); else if (h === 'acres' || h === 'small') open('calc');
+  });
+  open(location.hash.replace('#','') === 'timesheet' ? 'ts' : 'calc');
+})();
+</script>
+</body>
+</html>
